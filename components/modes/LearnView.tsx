@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CourseItem, LessonItem, QuizItem, Personality } from '../../types';
 import { PERSONALITY_THEMES, COURSE_CONTENT } from '../../constants';
-import { CheckCircle, XCircle, BookOpen, Quote, ArrowRight, ArrowLeft, List, X, Share2, Bookmark, Sparkles } from 'lucide-react';
+import { CheckCircle, XCircle, BookOpen, Quote, ArrowRight, ArrowLeft, List, X, Share2, Bookmark, Sparkles, Type, Minus, Plus, AlignJustify } from 'lucide-react';
 
 interface LearnViewProps {
   item: CourseItem;
@@ -32,6 +33,14 @@ const LearnView: React.FC<LearnViewProps> = ({
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [showFeedback, setShowFeedback] = React.useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [isAppearanceOpen, setAppearanceOpen] = useState(false);
+
+  // Appearance State
+  const [textSizeIndex, setTextSizeIndex] = useState(2); // Default text-xl
+  const [lineHeightIndex, setLineHeightIndex] = useState(2); // Default leading-loose
+
+  const fontSizes = ['text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl'];
+  const lineHeights = ['leading-normal', 'leading-relaxed', 'leading-loose'];
 
   // Get current theme
   const theme = PERSONALITY_THEMES[personality];
@@ -56,6 +65,71 @@ const LearnView: React.FC<LearnViewProps> = ({
       
       {/* Floating Action Bar (Top Right) */}
       <div className="absolute -top-12 right-0 flex items-center gap-2 z-50">
+        
+        {/* Appearance Toggle */}
+        <div className="relative">
+          <button 
+            onClick={() => setAppearanceOpen(!isAppearanceOpen)}
+            className={`p-2 rounded-full transition-colors backdrop-blur shadow-sm border ${isAppearanceOpen ? 'bg-white dark:bg-white/20 text-blue-500 border-blue-400' : 'bg-white/50 dark:bg-black/30 hover:bg-white dark:hover:bg-white/10 text-gray-500 border-white/40'}`}
+          >
+            <Type className="w-4 h-4" />
+          </button>
+          
+          <AnimatePresence>
+            {isAppearanceOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute top-12 right-0 w-64 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-4 z-50"
+              >
+                 <div className="space-y-4">
+                    {/* Font Size Control */}
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-gray-400 mb-2 flex justify-between">
+                        <span>Text Size</span>
+                        <span>{textSizeIndex + 1}/5</span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 rounded-lg p-1">
+                        <button 
+                          onClick={() => setTextSizeIndex(Math.max(0, textSizeIndex - 1))}
+                          className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-md shadow-sm transition-all disabled:opacity-30"
+                          disabled={textSizeIndex === 0}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <div className="flex-1 text-center font-bold text-sm">Aa</div>
+                        <button 
+                          onClick={() => setTextSizeIndex(Math.min(fontSizes.length - 1, textSizeIndex + 1))}
+                          className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-md shadow-sm transition-all disabled:opacity-30"
+                          disabled={textSizeIndex === fontSizes.length - 1}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Line Height Control */}
+                    <div>
+                       <div className="text-[10px] uppercase font-bold text-gray-400 mb-2">Line Spacing</div>
+                       <div className="flex gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-1">
+                          {lineHeights.map((h, i) => (
+                             <button
+                                key={h}
+                                onClick={() => setLineHeightIndex(i)}
+                                className={`flex-1 py-2 rounded-md transition-all flex justify-center ${i === lineHeightIndex ? 'bg-white dark:bg-white/20 shadow-sm text-blue-500' : 'hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400'}`}
+                             >
+                                <AlignJustify className={`w-4 h-4 ${i === 0 ? 'scale-y-75' : i === 1 ? 'scale-y-100' : 'scale-y-125'}`} />
+                             </button>
+                          ))}
+                       </div>
+                    </div>
+                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         <button className="p-2 rounded-full bg-white/50 dark:bg-black/30 hover:bg-white dark:hover:bg-white/10 transition-colors backdrop-blur text-gray-500 shadow-sm border border-white/40">
            <Bookmark className="w-4 h-4" />
         </button>
@@ -160,7 +234,14 @@ const LearnView: React.FC<LearnViewProps> = ({
             
             <div className="relative z-10">
               {item.type === 'lesson' ? (
-                <LessonContent item={item as LessonItem} theme={theme} />
+                <LessonContent 
+                  item={item as LessonItem} 
+                  theme={theme} 
+                  settings={{
+                    fontSizeClass: fontSizes[textSizeIndex],
+                    lineHeightClass: lineHeights[lineHeightIndex]
+                  }}
+                />
               ) : (
                 <QuizContent 
                   item={item as QuizItem} 
@@ -209,8 +290,8 @@ const LearnView: React.FC<LearnViewProps> = ({
   );
 };
 
-const LessonContent = ({ item, theme }: { item: LessonItem, theme: any }) => (
-  <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-p:font-serif prose-p:leading-loose">
+const LessonContent = ({ item, theme, settings }: { item: LessonItem, theme: any, settings: any }) => (
+  <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-p:font-serif">
     {/* Header Section */}
     <header className="mb-12 border-b border-gray-100 dark:border-gray-800 pb-8">
       <div className={`inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full ${theme.colors.highlight} text-xs font-bold uppercase tracking-widest`}>
@@ -232,12 +313,14 @@ const LessonContent = ({ item, theme }: { item: LessonItem, theme: any }) => (
       </div>
     </header>
     
-    {/* Body Content with enhanced typography */}
+    {/* Body Content with enhanced typography & dynamic settings */}
     <div className={`
-        text-xl text-gray-700 dark:text-gray-300 font-serif
+        ${settings.fontSizeClass} text-gray-700 dark:text-gray-300 font-serif
         first-letter:text-7xl first-letter:font-bold first-letter:mr-3 first-letter:float-left first-letter:text-gray-900 dark:first-letter:text-white first-letter:font-display
         [&_strong]:text-gray-900 [&_strong]:dark:text-white [&_strong]:font-bold
         [&_blockquote]:border-l-4 [&_blockquote]:border-current [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:my-8 [&_blockquote]:${theme.colors.accent}
+        [&_p]:!${settings.fontSizeClass} [&_p]:!${settings.lineHeightClass} [&_p]:mb-6
+        [&_li]:!${settings.fontSizeClass} [&_li]:!${settings.lineHeightClass}
     `}>
       <div dangerouslySetInnerHTML={{ __html: item.contentHTML }} />
     </div>

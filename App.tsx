@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   AppMode, 
@@ -10,8 +11,8 @@ import Background from './components/Background';
 import LearnView from './components/modes/LearnView';
 import KahootView from './components/modes/KahootView';
 import IELTSView from './components/modes/IELTSView';
+import LandingPage from './components/LandingPage';
 import { 
-  Settings, 
   Moon, 
   Sun, 
   GraduationCap, 
@@ -20,15 +21,14 @@ import {
   BarChart2, 
   Book,
   User,
-  Monitor,
   Search,
   Bell,
-  Menu,
-  Maximize2
+  Menu
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const App: React.FC = () => {
+  const [showLanding, setShowLanding] = useState(true);
   const [state, setState] = useState<AppState>({
     role: UserRole.STUDENT,
     mode: AppMode.LEARN,
@@ -76,6 +76,11 @@ const App: React.FC = () => {
       }));
     }
   };
+
+  // --- RENDER LANDING PAGE FIRST ---
+  if (showLanding) {
+    return <LandingPage onEnter={() => setShowLanding(false)} />;
+  }
 
   const SidebarPill = ({ icon: Icon, label, active, onClick, delay }: any) => (
     <button
@@ -129,7 +134,7 @@ const App: React.FC = () => {
       <Background personality={state.personality} darkMode={state.darkMode} />
 
       {/* FLOATING CONTAINER */}
-      <div className="w-full max-w-[1400px] h-[92vh] flex gap-8 relative z-10">
+      <div className="w-full max-w-[1400px] h-[92vh] flex gap-8 relative z-10 animate-in fade-in zoom-in duration-700">
         
         {/* --- LEFT SIDEBAR (FLOATING PILLS) --- */}
         <aside className="hidden lg:flex flex-col w-72 h-full z-20 justify-center gap-5">
@@ -281,7 +286,7 @@ const TeacherDashboard = ({ state, theme }: { state: AppState, theme: any }) => 
       {/* Stat Cards with Glass/Clay Mix */}
       {[
         { title: "Band Score", val: "6.5", sub: "+0.5 vs Last Week", color: theme.colors.accent, icon: Book },
-        { title: "Task Response", val: "7.0", sub: "Excellent adherence", color: "text-purple-500", icon: Monitor },
+        { title: "Task Response", val: "7.0", sub: "Excellent adherence", color: "text-purple-500", icon: FileText },
         { title: "Completion", val: "42%", sub: "12 Lessons Remaining", color: "text-orange-500", icon: BarChart2 }
       ].map((stat, i) => (
          <div key={i} className={`
