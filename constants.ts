@@ -6,6 +6,7 @@ export const PERSONALITY_THEMES = {
     id: 'introvert',
     label: "Focus Mode",
     description: "Minimalist. Calm. Deep work.",
+    texture: "bg-texture-noise",
     colors: {
       primary: "bg-slate-700",
       primaryGradient: "from-slate-700 to-slate-800",
@@ -31,6 +32,7 @@ export const PERSONALITY_THEMES = {
     id: 'extrovert',
     label: "Power Mode",
     description: "High energy. Gamified. Social.",
+    texture: "bg-texture-grid",
     colors: {
       primary: "bg-fuchsia-600",
       primaryGradient: "from-fuchsia-600 to-orange-500",
@@ -48,7 +50,7 @@ export const PERSONALITY_THEMES = {
       border: "border-transparent",
       animation: { type: "spring", stiffness: 300, damping: 15 },
       feedbackIntro: "Boom! 🎯",
-      font: "font-sans"
+      font: "font-sans" // Body is sans, but we will force display on headings
     },
     particles: { count: 120, speed: 1.8, connect: true, connectDist: 180, opacity: 0.6, size: 3 }
   },
@@ -56,6 +58,7 @@ export const PERSONALITY_THEMES = {
     id: 'ambivert',
     label: "Balanced",
     description: "Professional. Structured. Clear.",
+    texture: "bg-texture-dots",
     colors: {
       primary: "bg-cyan-600",
       primaryGradient: "from-cyan-600 to-blue-600",

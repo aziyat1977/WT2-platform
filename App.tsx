@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   AppMode, 
@@ -20,7 +19,12 @@ import {
   FileText, 
   BarChart2, 
   Book,
-  User
+  User,
+  Monitor,
+  Search,
+  Bell,
+  Menu,
+  Maximize2
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -73,254 +77,285 @@ const App: React.FC = () => {
     }
   };
 
-  const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
+  const SidebarPill = ({ icon: Icon, label, active, onClick, delay }: any) => (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-        active 
-          ? `${currentTheme.colors.primary} text-white shadow-lg` 
-          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
-      }`}
+      style={{ animationDelay: delay }}
+      className={`
+        glass-pill w-full flex items-center gap-4 px-5 py-4 transition-all duration-300 group relative
+        animate-float
+        ${active ? 'scale-105 z-20 ring-2 ring-blue-400 ring-offset-2 ring-offset-transparent' : 'hover:scale-105 opacity-90 hover:opacity-100'}
+      `}
     >
-      <Icon className={`w-5 h-5 transition-transform ${active ? 'scale-110' : 'group-hover:scale-110'}`} />
-      <span className="font-medium">{label}</span>
+      <div className={`
+        w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors
+        ${active ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md' : 'bg-gray-100 dark:bg-white/10 text-gray-500'}
+      `}>
+         <Icon className={`w-5 h-5`} />
+      </div>
+      <div className="flex flex-col items-start">
+        <span className={`font-bold font-display tracking-tight text-sm ${active ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+            {label}
+        </span>
+        <span className="text-[10px] uppercase font-bold text-gray-400">
+            {active ? 'Active Now' : 'Tap to open'}
+        </span>
+      </div>
+      {active && (
+         <div className="absolute right-4 w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+      )}
     </button>
   );
 
+  // --- IELTS MODE: Full Screen, bypasses the "Mockup Window" ---
+  if (state.mode === AppMode.IELTS) {
+    return (
+      <IELTSView 
+         item={currentItem}
+         onNext={handleNext}
+         onAnswer={handleAnswer}
+         onJumpTo={handleJumpTo}
+         currentIndex={state.currentCourseIndex}
+         totalItems={COURSE_CONTENT.length}
+      />
+    );
+  }
+
+  // --- STANDARD MOCKUP VIEW ---
   return (
-    <div className={`min-h-screen w-full relative overflow-hidden flex ${state.mode === AppMode.IELTS ? 'bg-gray-100' : ''}`}>
+    <div className={`h-screen w-screen relative flex items-center justify-center p-4 md:p-6 overflow-hidden bg-organic-green transition-all duration-1000`}>
       
-      {/* Background disabled in simulation mode */}
-      {state.mode !== AppMode.IELTS && (
-        <Background personality={state.personality} darkMode={state.darkMode} />
-      )}
+      {/* Background Particles */}
+      <Background personality={state.personality} darkMode={state.darkMode} />
 
-      {/* Sidebar Navigation */}
-      {state.mode !== AppMode.IELTS && (
-        <aside className="fixed left-4 top-4 bottom-4 w-72 bg-white/90 dark:bg-dark-surface/90 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-6 z-40 hidden md:flex flex-col shadow-2xl transition-all duration-300">
-          <div className="flex items-center gap-4 px-2 py-2 mb-10">
-            <div className={`w-12 h-12 bg-gradient-to-br ${currentTheme.colors.primaryGradient} rounded-xl flex items-center justify-center text-white shadow-lg`}>
-              <Book className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="font-bold text-gray-900 dark:text-white text-lg leading-none mb-1">Cullen.OS</h1>
-              <span className={`text-xs ${currentTheme.colors.accent} font-bold uppercase tracking-widest`}>WT2 Mastery</span>
-            </div>
-          </div>
-
-          <div className="space-y-2 flex-1">
-            <div className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Modes</div>
-            <SidebarItem 
-              icon={GraduationCap} 
-              label="The Core Course" 
-              active={state.mode === AppMode.LEARN && state.role === UserRole.STUDENT} 
-              onClick={() => setState(s => ({ ...s, mode: AppMode.LEARN, role: UserRole.STUDENT }))} 
-            />
-            <SidebarItem 
-              icon={Gamepad2} 
-              label="Skill Drill (Kahoot)" 
-              active={state.mode === AppMode.KAHOOT} 
-              onClick={() => setState(s => ({ ...s, mode: AppMode.KAHOOT }))} 
-            />
-            <SidebarItem 
-              icon={FileText} 
-              label="IELTS Exam Sim" 
-              active={state.mode === AppMode.IELTS} 
-              onClick={() => setState(s => ({ ...s, mode: AppMode.IELTS }))} 
-            />
-            
-            <div className="my-6 h-px bg-gray-200 dark:bg-white/5" />
-            
-            <div className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Analysis</div>
-            <SidebarItem 
-              icon={BarChart2} 
-              label="Progress Tracker" 
-              active={state.role === UserRole.TEACHER} 
-              onClick={() => setState(s => ({ ...s, role: UserRole.TEACHER, mode: AppMode.DASHBOARD }))} 
-            />
-          </div>
-
-          <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-white/5">
-             {/* Personality */}
-             <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2">Learning Persona</span>
-                <div className="bg-gray-100 dark:bg-black/40 p-1.5 rounded-xl flex text-xs">
-                    {[Personality.INTROVERT, Personality.AMBIVERT, Personality.EXTROVERT].map(p => {
-                      const isActive = state.personality === p;
-                      return (
-                      <button
-                        key={p}
-                        onClick={() => setState(s => ({ ...s, personality: p }))}
-                        className={`flex-1 py-2 rounded-lg transition-all font-medium ${
-                            isActive 
-                            ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' 
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                        title={PERSONALITY_THEMES[p].description}
-                      >
-                        {p === Personality.INTROVERT ? 'Focus' : p === Personality.AMBIVERT ? 'Balance' : 'Power'}
-                      </button>
-                    )})}
-                </div>
-                <div className="px-2 text-[10px] text-gray-400 text-center">
-                  {currentTheme.description}
-                </div>
-             </div>
-
-             <button 
-               onClick={() => setState(s => ({ ...s, darkMode: !s.darkMode }))}
-               className="flex items-center justify-between w-full px-4 py-3 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors"
-             >
-                {state.darkMode ? "Dark Mode" : "Light Mode"}
-                {state.darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-             </button>
-          </div>
-        </aside>
-      )}
-
-      {/* Main Viewport */}
-      <main className={`flex-1 relative transition-all duration-500 ${state.mode === AppMode.IELTS ? 'w-full h-screen p-0' : 'md:ml-80 p-6 md:p-8'}`}>
+      {/* FLOATING CONTAINER */}
+      <div className="w-full max-w-[1400px] h-[92vh] flex gap-8 relative z-10">
         
-        {/* Mobile Header */}
-        <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md z-30 flex items-center justify-between px-4 border-b border-gray-200 dark:border-white/10">
-           <span className="font-bold text-lg dark:text-white flex items-center gap-2">
-             <Book className={`w-5 h-5 ${currentTheme.colors.accent}`} /> Cullen.OS
-           </span>
-           <button 
-             onClick={() => setSidebarOpen(!isSidebarOpen)}
-             className="p-2 rounded-lg bg-gray-100 dark:bg-white/10"
-           >
-             <Settings className="w-5 h-5 dark:text-white" />
-           </button>
-        </div>
+        {/* --- LEFT SIDEBAR (FLOATING PILLS) --- */}
+        <aside className="hidden lg:flex flex-col w-72 h-full z-20 justify-center gap-5">
+           
+           {/* Branding Pill */}
+           <div className="glass-pill px-6 py-5 flex items-center gap-3 animate-float-delayed mb-4">
+             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${currentTheme.colors.primaryGradient} flex items-center justify-center text-white shadow-lg`}>
+               <Book className="w-5 h-5" />
+             </div>
+             <div>
+               <h1 className="font-extrabold text-lg text-gray-900 dark:text-white font-display leading-none">Cullen.OS</h1>
+               <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">WT2 Platform</span>
+             </div>
+           </div>
 
-        {/* Content Router */}
-        {state.role === UserRole.TEACHER ? (
-          <TeacherDashboard state={state} theme={currentTheme} />
-        ) : (
-          <div className="h-full flex flex-col">
-            {state.mode === AppMode.LEARN && (
-              <LearnView 
-                item={currentItem}
-                personality={state.personality}
-                onNext={handleNext}
-                onPrev={handlePrev}
-                onJumpTo={handleJumpTo}
-                onAnswer={handleAnswer}
-                isCompleted={state.completedIds.includes(currentItem.id)}
-                hasPrev={state.currentCourseIndex > 0}
-                hasNext={state.currentCourseIndex < COURSE_CONTENT.length - 1}
-                currentIndex={state.currentCourseIndex}
-              />
-            )}
-            {state.mode === AppMode.KAHOOT && (
-              <KahootView 
-                 item={currentItem}
-                 onNext={handleNext}
-                 onAnswer={handleAnswer}
-              />
-            )}
-            {state.mode === AppMode.IELTS && (
-              <IELTSView 
-                 item={currentItem}
-                 onNext={handleNext}
-                 onAnswer={handleAnswer}
-                 onJumpTo={handleJumpTo}
-                 currentIndex={state.currentCourseIndex}
-                 totalItems={COURSE_CONTENT.length}
-              />
-            )}
-          </div>
-        )}
-      </main>
+           {/* Navigation Pills */}
+           <div className="space-y-4">
+             <SidebarPill 
+               icon={GraduationCap} 
+               label="Learning Hub" 
+               active={state.mode === AppMode.LEARN && state.role === UserRole.STUDENT} 
+               onClick={() => { setState(s => ({ ...s, mode: AppMode.LEARN, role: UserRole.STUDENT })); }} 
+               delay="0s"
+             />
+             <SidebarPill 
+               icon={Gamepad2} 
+               label="Kahoot Arena" 
+               active={state.mode === AppMode.KAHOOT} 
+               onClick={() => { setState(s => ({ ...s, mode: AppMode.KAHOOT })); }} 
+               delay="0.2s"
+             />
+             <SidebarPill 
+               icon={FileText} 
+               label="Exam Simulator" 
+               active={state.mode === AppMode.IELTS} 
+               onClick={() => { setState(s => ({ ...s, mode: AppMode.IELTS })); }} 
+               delay="0.4s"
+             />
+             <SidebarPill 
+               icon={BarChart2} 
+               label="Analytics" 
+               active={state.role === UserRole.TEACHER} 
+               onClick={() => { setState(s => ({ ...s, role: UserRole.TEACHER, mode: AppMode.DASHBOARD })); }} 
+               delay="0.6s"
+             />
+           </div>
+
+           {/* User Control Pill */}
+           <div className="glass-pill mt-auto p-4 flex items-center justify-between animate-float">
+              <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden border border-white">
+                      <User className="w-full h-full p-1 text-gray-400" />
+                  </div>
+                  <div className="flex flex-col">
+                      <span className="text-xs font-bold text-gray-900 dark:text-white">Student</span>
+                      <span className="text-[10px] text-gray-500">{state.personality}</span>
+                  </div>
+              </div>
+              <button 
+                  onClick={() => setState(s => ({ ...s, darkMode: !s.darkMode }))}
+                  className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              >
+                  {state.darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              </button>
+           </div>
+        </aside>
+
+        {/* --- MAIN WINDOW --- */}
+        <main className="flex-1 glass-panel-premium rounded-[3rem] flex flex-col relative overflow-hidden shadow-2xl animate-float-delayed" style={{ animationDuration: '8s' }}>
+             
+             {/* WINDOW HEADER */}
+             <header className="h-20 px-8 flex items-center justify-between border-b border-black/5 dark:border-white/5 bg-white/40 dark:bg-black/20 backdrop-blur-xl z-50">
+                <div className="flex items-center gap-4">
+                   <div className="md:hidden">
+                       <button onClick={() => setSidebarOpen(!isSidebarOpen)}><Menu className="w-6 h-6 text-gray-700" /></button>
+                   </div>
+                   <div className="flex flex-col">
+                      <h2 className="text-lg font-bold text-gray-900 dark:text-white font-display">
+                          {state.mode === AppMode.LEARN ? 'Interactive Lesson' : 
+                           state.mode === AppMode.KAHOOT ? 'Live Quiz' : 'Teacher Dashboard'}
+                      </h2>
+                      <span className="text-xs text-gray-500 font-medium">Chapter {state.currentCourseIndex + 1} of {COURSE_CONTENT.length}</span>
+                   </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                   <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-black/20 rounded-full border border-white/40 shadow-sm text-sm text-gray-600 transition-colors">
+                      <Search className="w-4 h-4 opacity-50" />
+                      <span>Search...</span>
+                   </div>
+                   <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 border-2 border-white dark:border-white/10 shadow-md flex items-center justify-center">
+                      <Bell className="w-4 h-4 text-blue-600 dark:text-blue-300" />
+                   </div>
+                </div>
+             </header>
+
+             {/* CONTENT AREA */}
+             <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 md:p-10 relative scrollbar-hide">
+                 {state.role === UserRole.TEACHER ? (
+                    <TeacherDashboard state={state} theme={currentTheme} />
+                  ) : (
+                    <div className="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full min-h-[500px]">
+                      {state.mode === AppMode.LEARN && (
+                        <LearnView 
+                          item={currentItem}
+                          personality={state.personality}
+                          onNext={handleNext}
+                          onPrev={handlePrev}
+                          onJumpTo={handleJumpTo}
+                          onAnswer={handleAnswer}
+                          isCompleted={state.completedIds.includes(currentItem.id)}
+                          hasPrev={state.currentCourseIndex > 0}
+                          hasNext={state.currentCourseIndex < COURSE_CONTENT.length - 1}
+                          currentIndex={state.currentCourseIndex}
+                        />
+                      )}
+                      {state.mode === AppMode.KAHOOT && (
+                        <KahootView 
+                          item={currentItem}
+                          onNext={handleNext}
+                          onAnswer={handleAnswer}
+                        />
+                      )}
+                    </div>
+                  )}
+             </div>
+        </main>
+
+      </div>
     </div>
   );
 };
 
 const TeacherDashboard = ({ state, theme }: { state: AppState, theme: any }) => (
-  <div className="p-4 md:p-8 max-w-6xl mx-auto z-10 relative mt-16 md:mt-0">
-    <div className="mb-10">
-      <h2 className="text-4xl font-extrabold mb-2 dark:text-white">Student Mastery</h2>
-      <p className="text-gray-500 dark:text-gray-400">Analysis based on Cullen's Band 7+ Criteria</p>
+  <div className="w-full max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="mb-8 flex items-end justify-between">
+      <div>
+        <h2 className="text-4xl font-extrabold mb-2 dark:text-white font-display tracking-tight">Student Mastery</h2>
+        <p className="text-gray-500 dark:text-gray-400 font-sans text-base">Real-time analysis powered by Cullen.OS</p>
+      </div>
+      <div className="hidden md:block">
+        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold uppercase tracking-wider border border-green-500/20 backdrop-blur-sm">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Live Analysis
+        </span>
+      </div>
     </div>
     
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <div className={`bg-white dark:bg-dark-surface p-8 ${theme.ui.roundness} ${theme.ui.shadow} border border-gray-100 dark:border-dark-border relative overflow-hidden group`}>
-        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-          <Book className={`w-24 h-24 ${theme.colors.accent}`} />
-        </div>
-        <h3 className="text-gray-500 font-medium mb-1">Current Band Estimate</h3>
-        <div className={`text-5xl font-black ${theme.colors.accent}`}>6.5</div>
-        <div className="mt-4 text-sm text-green-500 font-bold bg-green-50 dark:bg-green-900/20 inline-block px-3 py-1 rounded-full">
-          +0.5 Improvement
-        </div>
-      </div>
-
-      <div className={`bg-white dark:bg-dark-surface p-8 ${theme.ui.roundness} ${theme.ui.shadow} border border-gray-100 dark:border-dark-border relative overflow-hidden`}>
-        <h3 className="text-gray-500 font-medium mb-1">Task Response</h3>
-        <div className="text-5xl font-black text-purple-500">7.0</div>
-        <p className="mt-4 text-sm text-gray-400">Strong identification of task.</p>
-      </div>
-
-      <div className={`bg-white dark:bg-dark-surface p-8 ${theme.ui.roundness} ${theme.ui.shadow} border border-gray-100 dark:border-dark-border relative overflow-hidden`}>
-        <h3 className="text-gray-500 font-medium mb-1">Course Progress</h3>
-        <div className="text-5xl font-black text-orange-500">42%</div>
-        <div className="w-full bg-gray-100 dark:bg-gray-800 h-2 mt-4 rounded-full overflow-hidden">
-          <div className="h-full bg-orange-500 w-[42%]" />
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Stat Cards with Glass/Clay Mix */}
+      {[
+        { title: "Band Score", val: "6.5", sub: "+0.5 vs Last Week", color: theme.colors.accent, icon: Book },
+        { title: "Task Response", val: "7.0", sub: "Excellent adherence", color: "text-purple-500", icon: Monitor },
+        { title: "Completion", val: "42%", sub: "12 Lessons Remaining", color: "text-orange-500", icon: BarChart2 }
+      ].map((stat, i) => (
+         <div key={i} className={`
+            relative p-8 rounded-3xl overflow-hidden group
+            bg-white dark:bg-white/5 border border-black/5 dark:border-white/10
+            shadow-xl shadow-black/5 hover:shadow-2xl transition-all hover:-translate-y-1
+         `}>
+             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <stat.icon className="w-24 h-24" />
+             </div>
+             <div className="relative z-10">
+                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3">{stat.title}</h3>
+                <div className={`text-5xl font-extrabold ${stat.color} font-display mb-4`}>{stat.val}</div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.sub}</p>
+             </div>
+         </div>
+      ))}
     </div>
 
-    <div className={`bg-white dark:bg-dark-surface p-8 ${theme.ui.roundness} ${theme.ui.shadow} border border-gray-100 dark:border-dark-border h-96`}>
-      <h3 className="text-xl font-bold mb-8 dark:text-white flex items-center gap-2">
-        <BarChart2 className="w-5 h-5 text-gray-400" />
-        Band Score Breakdown
-      </h3>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={MOCK_STATS}>
-          <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis domain={[0, 9]} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-          <Tooltip 
-            cursor={{ fill: 'transparent' }}
-            contentStyle={{ 
-              borderRadius: '16px', 
-              border: 'none', 
-              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              padding: '12px 20px'
-            }} 
-          />
-          <Bar 
-            dataKey="score" 
-            fill="url(#colorGradient)" 
-            radius={[8, 8, 8, 8]} 
-            barSize={40} 
-          >
-          </Bar>
-          <defs>
-            <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-              {theme.id === 'introvert' && (
-                <>
-                <stop offset="0%" stopColor="#475569" stopOpacity={1}/>
-                <stop offset="100%" stopColor="#1e293b" stopOpacity={1}/>
-                </>
-              )}
-              {theme.id === 'extrovert' && (
-                <>
-                <stop offset="0%" stopColor="#c026d3" stopOpacity={1}/>
-                <stop offset="100%" stopColor="#f97316" stopOpacity={1}/>
-                </>
-              )}
-               {theme.id === 'ambivert' && (
-                <>
-                <stop offset="0%" stopColor="#06b6d4" stopOpacity={1}/>
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={1}/>
-                </>
-              )}
-            </linearGradient>
-          </defs>
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 shadow-xl h-96 relative">
+      <div className="relative z-10 h-full flex flex-col">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-8 flex items-center gap-2">
+          Performance Metrics
+        </h3>
+        <div className="flex-1 w-full min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={MOCK_STATS} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <XAxis 
+                dataKey="name" 
+                stroke="#888" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                fontFamily="Plus Jakarta Sans, sans-serif" 
+                fontWeight={600}
+                dy={15}
+              />
+              <YAxis 
+                domain={[0, 9]} 
+                stroke="#888" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                fontFamily="Plus Jakarta Sans, sans-serif" 
+              />
+              <Tooltip 
+                cursor={{ fill: 'transparent' }}
+                contentStyle={{ 
+                  borderRadius: '16px', 
+                  border: 'none', 
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  padding: '12px 16px',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  fontSize: '13px',
+                  color: '#000'
+                }} 
+              />
+              <Bar 
+                dataKey="score" 
+                fill="url(#colorGradient)" 
+                radius={[8, 8, 8, 8]} 
+                barSize={60} 
+              />
+              <defs>
+                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={theme.colors.primary.split(' ')[0].replace('bg-', '') || '#3b82f6'} stopOpacity={0.9}/>
+                  <stop offset="100%" stopColor={theme.colors.primary.split(' ')[0].replace('bg-', '') || '#06b6d4'} stopOpacity={0.6}/>
+                </linearGradient>
+              </defs>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   </div>
 );

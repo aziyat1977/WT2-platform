@@ -11,9 +11,10 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-              serif: ['Merriweather', 'serif'], // For IELTS passages
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              display: ['"Plus Jakarta Sans"', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+              serif: ['Lora', 'Merriweather', 'serif'],
             },
             colors: {
               brand: {
@@ -22,37 +23,198 @@
                 900: '#0c4a6e',
               },
               dark: {
-                bg: '#0a0a0b',
-                surface: '#18181b',
+                bg: '#050505',
+                surface: '#121212',
                 border: '#27272a',
               }
             },
             animation: {
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'float-delayed': 'float 6s ease-in-out 3s infinite',
+              'grain': 'grain 8s steps(10) infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              grain: {
+                '0%, 100%': { transform: 'translate(0, 0)' },
+                '10%': { transform: 'translate(-5%, -10%)' },
+                '20%': { transform: 'translate(-15%, 5%)' },
+                '30%': { transform: 'translate(7%, -25%)' },
+                '40%': { transform: 'translate(-5%, 25%)' },
+                '50%': { transform: 'translate(-15%, 10%)' },
+                '60%': { transform: 'translate(15%, 0%)' },
+                '70%': { transform: 'translate(0%, 15%)' },
+                '80%': { transform: 'translate(3%, 35%)' },
+                '90%': { transform: 'translate(-10%, 10%)' },
+              }
             }
           },
         },
       }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-      /* Custom Scrollbar for IELTS Mode */
-      .ielts-scroll::-webkit-scrollbar {
-        width: 8px;
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
       }
-      .ielts-scroll::-webkit-scrollbar-track {
-        background: #f1f1f1;
+      ::-webkit-scrollbar-track {
+        background: transparent;
       }
-      .ielts-scroll::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
       }
-      .ielts-scroll::-webkit-scrollbar-thumb:hover {
-        background: #555;
+      .dark ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
       }
       
       body {
         overscroll-behavior: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      /* ORGANIC GREEN 3D SCENE (From Inspiration) */
+      .bg-organic-green {
+        background: radial-gradient(circle at 50% 0%, #d4e4d8 0%, #8ba894 50%, #4a6354 100%);
+        background-size: cover;
+      }
+      .dark .bg-organic-green {
+        background: radial-gradient(circle at 50% 0%, #2c3e32 0%, #1a261f 60%, #0d120f 100%);
+      }
+
+      /* FLOATING 3D PILL (Sidebar Items) */
+      .glass-pill {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border-radius: 999px; /* Pill shape */
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 
+          0 10px 20px -5px rgba(0, 0, 0, 0.1),
+          inset 0 -3px 0 rgba(0, 0, 0, 0.05), /* 3D Bevel Bottom */
+          inset 0 2px 0 rgba(255, 255, 255, 0.5); /* Highlight Top */
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+      }
+      .glass-pill:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 
+          0 15px 30px -5px rgba(0, 0, 0, 0.15),
+          inset 0 -3px 0 rgba(0, 0, 0, 0.05),
+          inset 0 2px 0 rgba(255, 255, 255, 0.8);
+        z-index: 50;
+      }
+      
+      .dark .glass-pill {
+        background: rgba(30, 30, 35, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 
+          0 10px 20px -5px rgba(0, 0, 0, 0.4),
+          inset 0 -3px 0 rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      /* GLOSSY BLUE 3D BUTTON ("Simplify with AI" Style) */
+      .btn-glossy-3d {
+        background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+        border-radius: 16px; /* Slightly squarer than pill */
+        color: white;
+        border: 1px solid #1e40af;
+        box-shadow: 
+          0 8px 15px -3px rgba(37, 99, 235, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.4), /* Top gloss */
+          inset 0 -2px 0 rgba(0, 0, 0, 0.2); /* Bottom shade */
+        transition: all 0.2s ease;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-glossy-3d:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+          0 12px 20px -3px rgba(37, 99, 235, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+        filter: brightness(1.1);
+      }
+      .btn-glossy-3d:active {
+        transform: translateY(1px);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+      }
+      /* Shine effect */
+      .btn-glossy-3d::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: 0.5s;
+      }
+      .btn-glossy-3d:hover::after {
+        left: 100%;
+      }
+
+      /* MAIN WINDOW GLASS */
+      .glass-panel-premium {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        box-shadow: 
+          0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+          0 40px 80px -20px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .dark .glass-panel-premium {
+        background: rgba(15, 15, 20, 0.6);
+        box-shadow: 
+          0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+          0 40px 80px -20px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      /* FILM GRAIN OVERLAY */
+      .bg-grain:after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        animation: grain 8s steps(10) infinite;
+        pointer-events: none;
+        z-index: 50;
+      }
+
+      /* TEXTURES */
+      .bg-texture-noise {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.07'/%3E%3C/svg%3E");
+      }
+      .bg-texture-grid {
+        background-size: 20px 20px;
+        background-image: radial-gradient(circle, #000000 1px, transparent 1px);
+        opacity: 0.1;
+      }
+      .dark .bg-texture-grid {
+        background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+      }
+
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
       }
     </style>
   <script type="importmap">
@@ -68,7 +230,7 @@
 }
 </script>
 </head>
-  <body class="bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-gray-100 transition-colors duration-300">
-    <div id="root"></div>
+  <body class="bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-gray-100 transition-colors duration-300 font-sans h-screen w-screen overflow-hidden bg-grain">
+    <div id="root" class="h-full w-full"></div>
   </body>
 </html>

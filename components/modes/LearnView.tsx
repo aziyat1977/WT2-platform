@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CourseItem, LessonItem, QuizItem, Personality } from '../../types';
 import { PERSONALITY_THEMES, COURSE_CONTENT } from '../../constants';
-import { CheckCircle, XCircle, BookOpen, Quote, ArrowRight, ArrowLeft, List, X } from 'lucide-react';
+import { CheckCircle, XCircle, BookOpen, Quote, ArrowRight, ArrowLeft, List, X, Share2, Bookmark, Sparkles } from 'lucide-react';
 
 interface LearnViewProps {
   item: CourseItem;
@@ -53,17 +52,24 @@ const LearnView: React.FC<LearnViewProps> = ({
   const animationConfig = theme.ui.animation;
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-[60vh] w-full max-w-4xl mx-auto z-10 relative ${theme.ui.font}`}>
+    <div className={`flex flex-col items-center w-full max-w-5xl mx-auto z-10 relative ${theme.ui.font}`}>
       
-      {/* Table of Contents Toggle */}
-      <div className="w-full flex justify-end mb-4 relative z-50">
+      {/* Floating Action Bar (Top Right) */}
+      <div className="absolute -top-12 right-0 flex items-center gap-2 z-50">
+        <button className="p-2 rounded-full bg-white/50 dark:bg-black/30 hover:bg-white dark:hover:bg-white/10 transition-colors backdrop-blur text-gray-500 shadow-sm border border-white/40">
+           <Bookmark className="w-4 h-4" />
+        </button>
+        <button className="p-2 rounded-full bg-white/50 dark:bg-black/30 hover:bg-white dark:hover:bg-white/10 transition-colors backdrop-blur text-gray-500 shadow-sm border border-white/40">
+           <Share2 className="w-4 h-4" />
+        </button>
         <button
           onClick={() => setMenuOpen(true)}
-          className={`flex items-center gap-2 px-4 py-2 ${theme.ui.roundness} ${theme.colors.buttonSecondary} backdrop-blur-md shadow-sm text-sm font-bold transition-transform hover:scale-105`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur border border-white/20 shadow-sm text-xs font-bold uppercase tracking-wider transition-transform hover:scale-105`}
         >
-          <List className="w-4 h-4" />
-          <span>Course Map</span>
+          <List className="w-3 h-3" />
+          <span>Index</span>
         </button>
+      </div>
 
         {/* Menu Dropdown/Drawer */}
         <AnimatePresence>
@@ -75,24 +81,24 @@ const LearnView: React.FC<LearnViewProps> = ({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setMenuOpen(false)}
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 rounded-[2.5rem]"
               />
               
               {/* Menu Content */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className={`absolute top-12 right-0 w-80 max-h-[70vh] overflow-y-auto bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-800 shadow-2xl ${theme.ui.roundness} z-50 p-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700`}
+                initial={{ opacity: 0, scale: 0.95, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.95, x: 20 }}
+                className={`absolute top-0 right-0 w-80 max-h-[70vh] overflow-y-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl z-50 p-2 scrollbar-thin m-4`}
               >
-                <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700 mb-2 sticky top-0 bg-white/95 dark:bg-dark-surface/95 backdrop-blur z-10">
-                  <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Course Content</span>
+                <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/10 mb-2 sticky top-0 bg-transparent z-10">
+                  <span className="text-xs font-bold uppercase tracking-widest text-gray-500 font-display">Course Content</span>
                   <button onClick={() => setMenuOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 p-2">
                   {COURSE_CONTENT.map((contentItem, idx) => {
                     const isActive = idx === currentIndex;
                     const isLesson = contentItem.type === 'lesson';
@@ -104,9 +110,9 @@ const LearnView: React.FC<LearnViewProps> = ({
                           onJumpTo(idx);
                           setMenuOpen(false);
                         }}
-                        className={`w-full text-left p-3 rounded-lg text-sm transition-colors flex items-start gap-3
+                        className={`w-full text-left p-3 rounded-xl text-sm transition-colors flex items-start gap-3
                           ${isActive 
-                            ? `${theme.colors.highlight} font-bold` 
+                            ? `${theme.colors.highlight} font-bold shadow-sm ring-1 ring-black/5` 
                             : 'hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-gray-300'}
                         `}
                       >
@@ -118,7 +124,7 @@ const LearnView: React.FC<LearnViewProps> = ({
                             {isLesson ? contentItem.title : (
                               <span className="italic flex items-center gap-1">
                                 <span className="text-[10px] uppercase border border-current px-1 rounded opacity-60">Quiz</span>
-                                {contentItem.question.slice(0, 40)}...
+                                {contentItem.question.slice(0, 30)}...
                               </span>
                             )}
                           </div>
@@ -131,48 +137,72 @@ const LearnView: React.FC<LearnViewProps> = ({
             </>
           )}
         </AnimatePresence>
-      </div>
 
       <AnimatePresence mode="wait">
         <motion.div
           key={item.id}
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -30, scale: 0.95 }}
+          exit={{ opacity: 0, y: -30, scale: 0.98 }}
           transition={animationConfig}
-          className={`bg-white dark:bg-dark-surface ${theme.ui.roundness} ${theme.ui.shadow} p-8 md:p-12 w-full border ${theme.ui.border} relative overflow-hidden`}
+          className={`
+            w-full bg-white dark:bg-gray-900 
+            rounded-[2rem] shadow-2xl shadow-black/5 overflow-hidden 
+            border border-white/80 dark:border-white/5 relative
+          `}
         >
-          {/* Decorative accent for Cullen branding */}
-          <div className={`absolute top-0 left-0 w-1.5 h-full ${theme.colors.primary}`} />
-          
-          {item.type === 'lesson' ? (
-            <LessonContent item={item as LessonItem} theme={theme} />
-          ) : (
-            <QuizContent 
-              item={item as QuizItem} 
-              theme={theme}
-              selectedOption={selectedOption}
-              showFeedback={showFeedback}
-              onSelect={handleOptionClick}
-            />
-          )}
+          {/* Top colored accent bar */}
+          <div className={`h-1.5 w-full bg-gradient-to-r ${theme.colors.primaryGradient}`} />
+
+          <div className="p-8 md:p-16 relative">
+            {/* Subtle Texture on the "Paper" */}
+            <div className="absolute inset-0 bg-texture-noise opacity-50 pointer-events-none mix-blend-multiply dark:mix-blend-overlay"></div>
+            
+            <div className="relative z-10">
+              {item.type === 'lesson' ? (
+                <LessonContent item={item as LessonItem} theme={theme} />
+              ) : (
+                <QuizContent 
+                  item={item as QuizItem} 
+                  theme={theme}
+                  selectedOption={selectedOption}
+                  showFeedback={showFeedback}
+                  onSelect={handleOptionClick}
+                />
+              )}
+            </div>
+          </div>
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex justify-between w-full mt-8 px-2">
+      <div className="flex justify-between w-full mt-8 px-4 items-center">
         <button 
           onClick={onPrev}
           disabled={!hasPrev}
-          className={`flex items-center gap-2 px-6 py-3 ${theme.ui.roundness} font-semibold backdrop-blur-sm transition-all ${theme.colors.buttonSecondary} disabled:opacity-30 disabled:cursor-not-allowed`}
+          className={`
+            flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm uppercase tracking-wide
+            backdrop-blur-md transition-all 
+            bg-white/40 dark:bg-black/40 border border-white/40 
+            hover:bg-white/70 dark:hover:bg-white/10
+            disabled:opacity-30 disabled:cursor-not-allowed
+            shadow-sm hover:shadow-md
+          `}
         >
           <ArrowLeft className="w-4 h-4" /> Previous
         </button>
+        
+        {/* GLOSSY 3D BUTTON - MATCHING "SIMPLIFY WITH AI" */}
         <button 
           onClick={onNext}
           disabled={!hasNext || (item.type === 'quiz' && !showFeedback)}
-          className={`flex items-center gap-2 px-8 py-3 ${theme.ui.roundness} font-bold text-white transition-all disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 disabled:cursor-not-allowed ${theme.colors.button}`}
+          className={`
+            btn-glossy-3d
+            flex items-center gap-3 px-8 py-3.5 
+            font-bold text-sm uppercase tracking-wide
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none
+          `}
         >
-          Next Step <ArrowRight className="w-4 h-4" />
+          Next Step <Sparkles className="w-4 h-4 text-blue-200" />
         </button>
       </div>
     </div>
@@ -180,59 +210,85 @@ const LearnView: React.FC<LearnViewProps> = ({
 };
 
 const LessonContent = ({ item, theme }: { item: LessonItem, theme: any }) => (
-  <div className="prose prose-lg dark:prose-invert max-w-none">
-    <div className={`flex items-center gap-3 mb-6 ${theme.colors.accent} border-b border-gray-100 dark:border-gray-800 pb-4`}>
-      <BookOpen className="w-6 h-6" />
-      <span className="text-sm font-bold uppercase tracking-widest">Cullen Methodology</span>
-    </div>
+  <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-p:font-serif prose-p:leading-loose">
+    {/* Header Section */}
+    <header className="mb-12 border-b border-gray-100 dark:border-gray-800 pb-8">
+      <div className={`inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full ${theme.colors.highlight} text-xs font-bold uppercase tracking-widest`}>
+        <BookOpen className="w-3 h-3" />
+        <span>Cullen Methodology</span>
+      </div>
+      
+      <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white tracking-tight leading-[1.1] font-display">
+        {item.title}
+      </h2>
+      
+      <div className="flex items-center gap-4 text-sm text-gray-500 font-medium font-display">
+        <span className="flex items-center gap-2">
+           <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
+           Pauline Cullen
+        </span>
+        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span>5 min read</span>
+      </div>
+    </header>
     
-    <h2 className="text-4xl font-extrabold mb-8 text-gray-900 dark:text-white tracking-tight leading-tight">{item.title}</h2>
-    
-    <div className={`text-lg leading-relaxed text-gray-700 dark:text-gray-300 space-y-6 [&_strong]:text-current [&_strong]:${theme.colors.accent}`}>
+    {/* Body Content with enhanced typography */}
+    <div className={`
+        text-xl text-gray-700 dark:text-gray-300 font-serif
+        first-letter:text-7xl first-letter:font-bold first-letter:mr-3 first-letter:float-left first-letter:text-gray-900 dark:first-letter:text-white first-letter:font-display
+        [&_strong]:text-gray-900 [&_strong]:dark:text-white [&_strong]:font-bold
+        [&_blockquote]:border-l-4 [&_blockquote]:border-current [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:my-8 [&_blockquote]:${theme.colors.accent}
+    `}>
       <div dangerouslySetInnerHTML={{ __html: item.contentHTML }} />
     </div>
 
-    <div className="mt-10 pt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-sm text-gray-500">
-      <span className="font-mono flex items-center gap-2">
+    {/* Footer Citation */}
+    <div className="mt-16 pt-8 border-t-2 border-dashed border-gray-200 dark:border-gray-800 flex items-center justify-between text-xs font-mono text-gray-400 uppercase tracking-widest">
+      <div className="flex items-center gap-2">
         <Quote className="w-4 h-4" />
         {item.citation}
-      </span>
-      {theme.id !== 'introvert' && (
-        <span className={`px-3 py-1 ${theme.colors.secondary} ${theme.colors.accent} rounded-full text-xs font-bold uppercase`}>
-          Essential Reading
-        </span>
-      )}
+      </div>
+      <span>WT2 // Module</span>
     </div>
-  </div>
+  </article>
 );
 
 const QuizContent = ({ item, theme, selectedOption, showFeedback, onSelect }: any) => {
   const isExtrovert = theme.id === 'extrovert';
 
   return (
-    <div>
-      <div className={`flex items-center gap-3 mb-8 ${theme.colors.accent} border-b border-gray-100 dark:border-gray-800 pb-4`}>
-        <div className={`w-2.5 h-2.5 rounded-full ${theme.colors.primary} ${isExtrovert ? 'animate-ping' : ''}`} />
-        <span className="text-sm font-bold uppercase tracking-widest">Pop Quiz</span>
+    <div className="max-w-3xl mx-auto">
+      <div className="flex justify-center mb-8">
+         <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${theme.colors.secondary} ${theme.colors.accent} text-xs font-bold uppercase tracking-widest shadow-inner`}>
+            <div className={`w-2 h-2 rounded-full ${theme.colors.primary} ${isExtrovert ? 'animate-ping' : ''}`} />
+            Knowledge Check
+         </div>
       </div>
       
-      <h3 className="text-2xl font-bold mb-8 dark:text-white leading-snug">{item.question}</h3>
+      <h3 className="text-3xl md:text-4xl font-extrabold mb-12 text-center text-gray-900 dark:text-white leading-tight font-display">
+        {item.question}
+      </h3>
       
       <div className="space-y-4">
         {item.options.map((opt: any) => {
-          let stateStyles = `border-2 ${theme.ui.border} hover:border-current hover:${theme.colors.secondary} dark:hover:bg-white/5`;
+          let stateStyles = `
+            bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-gray-800 
+            hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg hover:-translate-y-0.5
+          `;
           let icon = null;
 
           if (showFeedback) {
             if (opt.correct) {
-              stateStyles = `${theme.colors.feedbackCorrect} border-current ring-1 ring-current font-semibold`;
+              stateStyles = `${theme.colors.feedbackCorrect} border-current ring-1 ring-current shadow-lg scale-[1.02] z-10`;
               icon = <CheckCircle className="w-6 h-6 shrink-0" />;
             } else if (selectedOption === opt.id) {
-              stateStyles = `${theme.colors.feedbackWrong} border-current font-medium`;
+              stateStyles = `${theme.colors.feedbackWrong} border-current opacity-60 grayscale`;
               icon = <XCircle className="w-6 h-6 shrink-0" />;
             } else {
-              stateStyles = "opacity-50 border-transparent grayscale";
+              stateStyles = "opacity-30 border-transparent grayscale scale-95";
             }
+          } else if (selectedOption === opt.id) {
+             stateStyles = "border-gray-900 dark:border-white shadow-md";
           }
 
           return (
@@ -240,34 +296,47 @@ const QuizContent = ({ item, theme, selectedOption, showFeedback, onSelect }: an
               key={opt.id}
               onClick={() => onSelect(opt)}
               disabled={showFeedback}
-              className={`w-full p-5 ${theme.ui.roundness} text-left transition-all duration-300 flex items-center justify-between group ${stateStyles}`}
+              className={`
+                w-full p-6 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group 
+                ${stateStyles}
+              `}
             >
-              <span className="text-lg pr-4">{opt.text}</span>
+              <div className="flex items-center gap-4">
+                 <span className={`
+                    w-8 h-8 rounded-full border border-current flex items-center justify-center text-sm font-bold opacity-50
+                    ${showFeedback && opt.correct ? 'bg-current text-white border-transparent' : ''}
+                 `}>
+                    {opt.id.toUpperCase()}
+                 </span>
+                 <span className="text-xl font-medium font-display tracking-tight">{opt.text}</span>
+              </div>
               {showFeedback && icon}
             </button>
           );
         })}
       </div>
 
-      {showFeedback && (
-        <motion.div 
-          initial={{ opacity: 0, height: 0, scale: 0.95 }}
-          animate={{ opacity: 1, height: 'auto', scale: 1 }}
-          className={`mt-8 p-6 ${theme.ui.roundness} ${item.options.find((o: any) => o.id === selectedOption)?.correct ? theme.colors.feedbackCorrect : theme.colors.highlight} border-l-4`}
-        >
-          <div className="flex items-start gap-3">
-            {isExtrovert && item.options.find((o: any) => o.id === selectedOption)?.correct && (
-                 <span className="text-2xl">🎉</span>
-            )}
-            <div>
-              <h4 className="font-bold mb-1 opacity-80 uppercase text-xs tracking-wider">{theme.ui.feedbackIntro}</h4>
-              <p className="text-lg font-medium">
-                {item.options.find((o: any) => o.id === selectedOption)?.feedback || item.options.find((o: any) => o.correct)?.feedback}
-              </p>
+      <AnimatePresence>
+        {showFeedback && (
+            <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mt-10 p-8 rounded-3xl ${item.options.find((o: any) => o.id === selectedOption)?.correct ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-100' : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100'}`}
+            >
+            <div className="flex items-start gap-4">
+                <div className="p-3 bg-white dark:bg-black/20 rounded-xl shrink-0">
+                   {item.options.find((o: any) => o.id === selectedOption)?.correct ? <CheckCircle className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
+                </div>
+                <div>
+                <h4 className="font-bold mb-2 uppercase text-xs tracking-widest opacity-60 font-display">Analysis</h4>
+                <p className="text-lg leading-relaxed font-serif">
+                    {item.options.find((o: any) => o.id === selectedOption)?.feedback || item.options.find((o: any) => o.correct)?.feedback}
+                </p>
+                </div>
             </div>
-          </div>
-        </motion.div>
-      )}
+            </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

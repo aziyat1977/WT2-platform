@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Personality } from '../types';
 import { PERSONALITY_THEMES } from '../constants';
@@ -102,10 +103,16 @@ const Background: React.FC<BackgroundProps> = ({ personality, darkMode }) => {
   }, [personality, darkMode, theme]);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 transition-opacity duration-1000"
-    />
+    <>
+      {/* Texture Layer */}
+      <div className={`fixed inset-0 ${theme.texture} pointer-events-none opacity-40 z-0 transition-opacity duration-1000 mix-blend-overlay`} />
+      
+      {/* Particles Layer */}
+      <canvas 
+        ref={canvasRef} 
+        className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 transition-opacity duration-1000"
+      />
+    </>
   );
 };
 
